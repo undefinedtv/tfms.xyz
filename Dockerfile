@@ -18,35 +18,29 @@ RUN pip install --no-cache-dir \
     flask \
     curl-cffi \
     m3u8 \
-    gunicorn \
-    gevent
+    gunicorn[gevent]
 
-# Çevre değişkenleri - Streaming için optimize
+# Çevre değişkenleri
 ENV PYTHONPATH=/app \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PORT=7860
 
 EXPOSE 7860
 
 # Sağlık kontrolü
-HEALTHCHECK --interval=30s --timeout=15s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:7860/ || exit 1
 
-# Gunicorn yapılandırması - Streaming için (düzeltilmiş)
+# Basitleştirilmiş başlatma
 CMD exec gunicorn \
+    --bind 0.0.0.0:7860 \
     --workers 1 \
     --worker-class gevent \
-    --worker-connections 50 \
-    --threads 4 \
+    --worker-connections 100 \
     --timeout 300 \
-    --graceful-timeout 60 \
-    --keep-alive 75 \
-    --max-requests 500 \
-    --max-requests-jitter 50 \
-    --bind 0.0.0.0:7860 \
+    --graceful-timeout 30 \
+    --keep-alive 5 \
+    --log-level info \
     --access-logfile - \
     --error-logfile - \
-    --log-level warning \
-    --limit-request-line 8190 \
-    --limit-request-field_size 8190 \
-    --preload \
     proxy:app
