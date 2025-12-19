@@ -18,4 +18,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 7860
 
-CMD ["gunicorn", "--workers", "2", "--threads", "2", "--bind", "0.0.0.0:7860", "proxy:app"]
+CMD ["gunicorn", "--workers", "1", "--threads", "1", "--timeout", "120", "--bind", "0.0.0.0:7860", "proxy:app"]
